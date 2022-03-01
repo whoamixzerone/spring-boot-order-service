@@ -4,4 +4,4 @@
 * spring-boot
 * JPA
 * spring-batch
-등 한 단계씩 진행행
+등 한 단계씩 진행
