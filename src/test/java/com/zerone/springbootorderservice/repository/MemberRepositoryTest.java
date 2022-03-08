@@ -17,9 +17,10 @@ public class MemberRepositoryTest {
     public void insertMembers() {
         IntStream.rangeClosed(1, 3).forEach(i -> {
             Member member = Member.builder()
-                    .id("user" + i)
+                    .id("admin" + i)
                     .password("1234")
-                    .name("test" + i)
+                    .name("관리자" + i)
+                    .auth(0)
                     .build();
 
             memberRepository.save(member);

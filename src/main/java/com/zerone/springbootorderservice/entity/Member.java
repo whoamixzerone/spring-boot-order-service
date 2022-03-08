@@ -19,10 +19,13 @@ public class Member extends BaseEntity {
 
     private String name;
 
+    private int auth;
+
     @Builder
-    public Member(String id, String password, String name) {
+    public Member(String id, String password, String name, int auth) {
         this.id = id;
         this.password = password;
         this.name = name;
+        this.auth = auth;
     }
 }
