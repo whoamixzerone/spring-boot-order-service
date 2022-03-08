@@ -5,3 +5,6 @@
 * JPA
 * spring-batch
 등 한 단계씩 진행
+  
+### 단계별 진행 내용
+- 👉 [Step1](https://github.com/whoamixzerone/spring-boot-order-service/blob/main/step1.md)

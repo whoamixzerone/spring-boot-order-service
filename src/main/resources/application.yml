@@ -1,9 +1,4 @@
 spring:
-  # h2 설정
-  h2:
-    console:
-      enabled: true
-
   # DB 연결
   datasource:
     url: jdbc:h2:file:~/zerone/99_study/db/testdb;AUTO_SERVER=true
@@ -13,10 +8,15 @@ spring:
 
   # hibernate 설정
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     properties:
       hibernate:
         format_sql: true # 압축된 쿼리를 읽기 좋게 포멧
     hibernate:
       ddl-auto: update # 서버 시작에 변경된 내용 반영. 테이블이 없으면 생성
     show-sql: true # 콘솔에 JPA 실행 쿼리를 출력
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  # h2 설정
+  h2:
+    console:
+      enabled: true

@@ -39,7 +39,7 @@ API에 대한 상세 설명과 이슈 내용 정리
 </tr>
 <tr>
     <td>POST</td>
-    <td>/auto/login</td>
+    <td>/member/login</td>
     <td>회원 로그인</td>
     <td>
     {
@@ -63,7 +63,7 @@ API에 대한 상세 설명과 이슈 내용 정리
 </tr>
 <tr>
     <td>GET</td>
-    <td>/users/me</td>
+    <td>/member/me</td>
     <td>회원정보 요청</td>
     <td>
     {
@@ -90,7 +90,7 @@ API에 대한 상세 설명과 이슈 내용 정리
 </tr>
 <tr>
     <td>GET</td>
-    <td>/auth/logout</td>
+    <td>/member/logout</td>
     <td>회원 로그아웃</td>
     <td></td>
     <td>200(Status Code OK)</td>
