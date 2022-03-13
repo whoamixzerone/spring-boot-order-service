@@ -21,14 +21,10 @@ public class Member extends BaseEntity {
     @ApiModelProperty(example = "관리자1")
     private String name;
 
-    @ApiModelProperty(example = "0")
-    private int auth;
-
     @Builder
-    public Member(String id, String password, String name, int auth) {
+    public Member(String id, String password, String name) {
         this.id = id;
         this.password = password;
         this.name = name;
-        this.auth = auth;
     }
 }

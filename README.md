@@ -2,6 +2,7 @@
 
 ### 개인 공부 목적으로 진행
 * spring-boot
+* JWT Token
 * JPA
 * spring-batch
 등 한 단계씩 진행

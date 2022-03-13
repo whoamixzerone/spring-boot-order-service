@@ -20,7 +20,6 @@ public class MemberRepositoryTest {
                     .id("admin" + i)
                     .password("1234")
                     .name("관리자" + i)
-                    .auth(0)
                     .build();
 
             memberRepository.save(member);
