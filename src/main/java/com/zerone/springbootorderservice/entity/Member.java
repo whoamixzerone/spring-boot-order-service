@@ -1,9 +1,9 @@
 package com.zerone.springbootorderservice.entity;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -11,19 +11,16 @@ import javax.persistence.*;
 @ToString
 public class Member extends BaseEntity {
 
-    @ApiModelProperty(example = "admin")
     @Id
-    private String id;
+    private String userId;
 
-    @ApiModelProperty(example = "1234")
     private String password;
 
-    @ApiModelProperty(example = "관리자1")
     private String name;
 
     @Builder
-    public Member(String id, String password, String name) {
-        this.id = id;
+    public Member(String userId, String password, String name) {
+        this.userId = userId;
         this.password = password;
         this.name = name;
     }

@@ -15,7 +15,7 @@ API에 대한 상세 설명과 이슈 내용 정리
 
 ## 📔 Issue
 프로젝트를 진행하면서 고민했던 이슈들
-- 👉 [Issue](https://github.com/whoamixzerone/spring-boot-order-service/wiki/Issue)
+- 👉 [Issue](https://github.com/whoamixzerone/spring-boot-order-service/wiki#Issue)
 
 ## 기능 명세
 <table>

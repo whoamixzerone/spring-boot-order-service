@@ -1,7 +1,7 @@
 package com.zerone.springbootorderservice.controller;
 
 import com.zerone.springbootorderservice.entity.Member;
-import com.zerone.springbootorderservice.repository.MemberRepository;
+import com.zerone.springbootorderservice.service.MemberService;
 import com.zerone.springbootorderservice.util.JwtTokenProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -14,41 +14,53 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestTemplate;
 
 import javax.xml.bind.DatatypeConverter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+import static java.lang.String.format;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(MemberController.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class MemberControllerTest {
 
-    @Autowired
-    private MockMvc mvc;
+    @LocalServerPort
+    private int port;
 
-    @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+//    @MockBean
+//    private JwtTokenProvider jwtTokenProvider;
 
     @Value("${secret.access}")
     private String SECRET_KEY;
 
     private final long ACCESS_TOKEN_VALID_TIME = 1000 * 5L;
 
+    private RestTemplate restTemplate = new RestTemplate();
+
+    private URI uri(String path) throws URISyntaxException {
+        return new URI(format("http://localhost:%d%s", port, path));
+    }
+
     @BeforeEach
     public void setUp() {
         SECRET_KEY = Base64.getEncoder().encodeToString(SECRET_KEY.getBytes());
-
-        memberRepository.save(Member.builder()
-                .id("admin1")
-                .password("1234")
-                .name("관리자1")
-                .build()
-        );
     }
 
     @AfterEach
@@ -82,20 +94,16 @@ public class MemberControllerTest {
     }
 
     @Test
-    public void loginTest() {
-        String userId = "admin1";
-        String pwd = "1234";
+    public void loginTest() throws URISyntaxException {
+        Member member = Member.builder()
+                .userId("admin1")
+                .password("1234")
+                .build();
+        HttpEntity<Member> body = new HttpEntity<>(member);
+        ResponseEntity<String> response = restTemplate.exchange(uri("/member/login"), HttpMethod.POST, body, String.class);
 
-        /**
-         * 1. 토큰을 생성
-         * 2. given().willReturn({"accessToken": token})
-         * 3.
-         */
+        assertEquals(200, response.getStatusCodeValue());
 
-        /**
-         * id,pwd가 일치하는 사용자를 조회,
-         * JWT Token을 생성해서 전달
-         * {'accessToken': token}
-         */
+        System.out.println(response.getBody());
     }
 }
