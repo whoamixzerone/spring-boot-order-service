@@ -8,7 +8,7 @@ import lombok.Getter;
 @Builder
 public class MemberRequest {
 
-    @ApiModelProperty(example = "admin")
+    @ApiModelProperty(example = "admin1")
     private String userId;
 
     @ApiModelProperty(example = "1234")

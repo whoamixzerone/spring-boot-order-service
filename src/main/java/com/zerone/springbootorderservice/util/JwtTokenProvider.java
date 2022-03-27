@@ -45,11 +45,13 @@ public class JwtTokenProvider {
     // Request Header에서 Bearer 제외한 token 값을 가져온다.
     public String getHeaderToken(HttpServletRequest request) {
         try {
-            String token = request.getHeader("authentication").split("Bearer ")[1];
+            String token = request.getHeader("Authorization").split("Bearer ")[1];
 
             return token;
-        } catch (IndexOutOfBoundsException exception) {
+        } catch (IndexOutOfBoundsException e) {
             throw new IndexOutOfBoundsException();
+        } catch (NullPointerException e) {
+            throw new NullPointerException();
         }
     }
 
