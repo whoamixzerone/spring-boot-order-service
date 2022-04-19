@@ -5,6 +5,11 @@
 * entity(사용자)
 * jwt token 로그인
 * 로그인 exception 처리
+  * 헤더에 토큰 없을 경우 - 401 Unauthorized
+  * 토큰 포맷이 틀린 경우 - 401 Unauthorized
+  * 토큰 값이 틀린 경우 - 401 Unauthorized
+  * 토큰 만료됐을 경우 - 403 forbidden
+  * 없는 사용자일 경우
 * token 만료 refresh
 * 단위테스트 꼭 작성!
 * swagger-ui api 명세서

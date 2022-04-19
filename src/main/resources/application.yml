@@ -22,5 +22,8 @@ spring:
       enabled: true
 
 # jwt secret key
-secret:
-  access: acc
+jwt:
+  header: Authorization
+  secret: WmVyT25lLXRlY2gtc3ByaW5nLWJvb3Qtb3JkZXItc2VydmljZS10b2tlbi1zZWNyZXQtWmVyT25lLXRlY2gtc3ByaW5nLWJvb3Qtb3JkZXItc2VydmljZS10b2tlbi1zZWNyZXQK
+#  token-valid-in-seconds: 10800
+  token-valid-in-seconds: 10

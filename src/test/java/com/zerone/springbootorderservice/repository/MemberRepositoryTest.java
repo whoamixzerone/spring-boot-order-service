@@ -17,7 +17,7 @@ public class MemberRepositoryTest {
     public void insertMembers() {
         IntStream.rangeClosed(1, 2).forEach(i -> {
             Member member = Member.builder()
-                    .userId("admin" + i)
+                    .email("admin" + i + "@gmail.com")
                     .password("1234")
                     .name("관리자" + i)
                     .build();

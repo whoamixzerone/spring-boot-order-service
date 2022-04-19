@@ -1,74 +1,80 @@
 package com.zerone.springbootorderservice.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.zerone.springbootorderservice.entity.Member;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.bind.DatatypeConverter;
-import java.util.Base64;
+import java.security.Key;
 import java.util.Date;
 
 @Component
-public class JwtTokenProvider {
+public class JwtTokenProvider implements InitializingBean {
 
-    @Value("${secret.access}")
-    private String SECRET_KEY;
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    // 토큰 유효기간 1일
-    private final long ACCESS_TOKEN_EXPIRED_TIME = 1000 * 60 * 60 * 24L;
+    private final String secret;
+    private final long tokenValidInMilliseconds;
 
-    @PostConstruct
-    protected void init() {
-        this.SECRET_KEY = Base64.getEncoder().encodeToString(SECRET_KEY.getBytes());
+    private Key key;
+
+    public JwtTokenProvider(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.token-valid-in-seconds}") long tokenValidInMilliseconds) {
+        this.secret = secret;
+        this.tokenValidInMilliseconds = tokenValidInMilliseconds * 1000;
     }
 
-    public String createAccessToken(String userId) {
-        Claims claims = Jwts.claims();
-        claims.put("userId", userId);
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
+    }
 
-        Date now = new Date();
+    public String createAccessToken(Member member) {
+        Claims claims = Jwts.claims();
+        claims.put("email", member.getEmail());
+        claims.put("token_type", "access_token");
+
+        long now = (new Date()).getTime();
+        Date valid = new Date(now + this.tokenValidInMilliseconds);
 
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setClaims(claims)  // 정보 저장
-                .setIssuedAt(now)   // 발행 시간 정보
-                .setExpiration(new Date(now.getTime() + ACCESS_TOKEN_EXPIRED_TIME))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .setExpiration(valid)
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
 
-    // Request Header에서 Bearer 제외한 token 값을 가져온다.
-    public String getHeaderToken(HttpServletRequest request) {
-        try {
-            String token = request.getHeader("Authorization").split("Bearer ")[1];
-
-            return token;
-        } catch (IndexOutOfBoundsException e) {
-            throw new IndexOutOfBoundsException();
-        } catch (NullPointerException e) {
-            throw new NullPointerException();
-        }
-    }
-
-    public Claims getClaimsToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(DatatypeConverter.parseBase64Binary(SECRET_KEY))
+    public Claims getAuthentication(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    public boolean isVerifyToken(String token) {
+    public boolean validateToken(String token) {
         try {
-            Claims claims = getClaimsToken(token);
+            Claims claims = getAuthentication(token);
 
             return true;
-        } catch (ExpiredJwtException exception) {
-            return false;
+        } catch (SecurityException | MalformedJwtException e) {
+            logger.info("잘못된 JWT 서명입니다.");
+        } catch (ExpiredJwtException e) {
+            logger.info("만료된 JWT 토큰입니다.");
+        } catch (UnsupportedJwtException e) {
+            logger.info("지원되지 않는 JWT 토큰입니다.");
+        } catch (IllegalArgumentException e) {
+            logger.info("JWT 토큰이 잘못되었습니다.");
         }
+        return false;
     }
 }

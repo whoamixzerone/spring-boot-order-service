@@ -5,6 +5,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,10 +18,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import javax.xml.bind.DatatypeConverter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Base64;
+import java.security.Key;
 import java.util.Date;
 
 import static java.lang.String.format;
@@ -34,10 +35,12 @@ public class MemberControllerTest {
     @LocalServerPort
     private int port;
 
-    @Value("${secret.access}")
-    private String SECRET_KEY;
-
-    private final long ACCESS_TOKEN_VALID_TIME = 1000 * 5L;
+    @Value("${jwt.secret}")
+    private String secret;
+    @Value("${jwt.token-valid-in-seconds}")
+    private long tokenValidInMilliseconds;
+    private Key key;
+    private final long ACCESS_TOKEN_VALID_TIME = 1000 * 3L;
 
     private RestTemplate restTemplate = new RestTemplate();
 
@@ -47,7 +50,8 @@ public class MemberControllerTest {
 
     @BeforeEach
     public void setUp() {
-        SECRET_KEY = Base64.getEncoder().encodeToString(SECRET_KEY.getBytes());
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     @AfterEach
@@ -57,23 +61,28 @@ public class MemberControllerTest {
     @Test
     public void createTokenTest() throws InterruptedException {
         Claims claims = Jwts.claims();
-        claims.put("userId", "admin1");
-        Date now = new Date();
+        claims.put("email", "admin1@gmail.com");
+        claims.put("token_type", "access_token");
+
+        long now = (new Date()).getTime();
+//        Date valid = new Date(now + this.tokenValidInMilliseconds);
+        Date valid = new Date(now + this.ACCESS_TOKEN_VALID_TIME);
 
         String token = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + ACCESS_TOKEN_VALID_TIME))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .setExpiration(valid)
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
+
         System.out.println(token);
 
         Thread.sleep(5000);
 
         assertThrows(ExpiredJwtException.class, () -> {
-            Claims accessClaims = Jwts.parser()
-                    .setSigningKey(DatatypeConverter.parseBase64Binary(SECRET_KEY))
+            Claims accessClaims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
                     .parseClaimsJws(token)
                     .getBody();
             System.out.println(accessClaims);
@@ -83,7 +92,21 @@ public class MemberControllerTest {
     @Test
     public void loginTest() throws URISyntaxException {
         Member member = Member.builder()
-                .userId("admin1")
+                .email("admin1@gmail.com")
+                .password("1234")
+                .build();
+        HttpEntity<Member> body = new HttpEntity<>(member);
+        ResponseEntity<String> response = restTemplate.exchange(uri("/member/login"), HttpMethod.POST, body, String.class);
+        System.out.println(response.getBody());
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertThat(response.getBody(), containsString("access_token"));
+    }
+
+    @Test
+    public void notMemberLoginTest() throws URISyntaxException {
+        Member member = Member.builder()
+                .email("admin99@gmail.com")
                 .password("1234")
                 .build();
         HttpEntity<Member> body = new HttpEntity<>(member);

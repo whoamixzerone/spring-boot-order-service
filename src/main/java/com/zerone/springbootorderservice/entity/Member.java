@@ -2,8 +2,7 @@ package com.zerone.springbootorderservice.entity;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -12,15 +11,21 @@ import javax.persistence.Id;
 public class Member extends BaseEntity {
 
     @Id
-    private String userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
 
+    @Column
+    private String email;
+
+    @Column
     private String password;
 
+    @Column
     private String name;
 
     @Builder
-    public Member(String userId, String password, String name) {
-        this.userId = userId;
+    public Member(String email, String password, String name) {
+        this.email = email;
         this.password = password;
         this.name = name;
     }

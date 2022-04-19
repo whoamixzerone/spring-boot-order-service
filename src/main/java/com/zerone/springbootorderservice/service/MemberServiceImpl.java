@@ -3,6 +3,7 @@ package com.zerone.springbootorderservice.service;
 import com.zerone.springbootorderservice.dto.MemberRequest;
 import com.zerone.springbootorderservice.dto.TokenResponse;
 import com.zerone.springbootorderservice.entity.Member;
+import com.zerone.springbootorderservice.exception.UserNotFoundException;
 import com.zerone.springbootorderservice.repository.MemberRepository;
 import com.zerone.springbootorderservice.util.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,12 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public TokenResponse doLogin(MemberRequest memberRequest) {
-        Optional<Member> member = memberRepository.findById(memberRequest.getUserId());
+        Optional<Member> member = memberRepository.findByEmail(memberRequest.getEmail());
+        if(!member.isPresent()) {
+            throw new UserNotFoundException();
+        }
 
-        String accessToken = jwtTokenProvider.createAccessToken(member.get().getUserId());
+        String accessToken = jwtTokenProvider.createAccessToken(member.get());
 
         return TokenResponse.builder()
                 .access_token(accessToken)
